@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   IconButton,
@@ -24,6 +24,8 @@ import FlexBetween from "components/FlexBetween";
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
+  const [matchingNames, setMatchingNames] = useState([]); // State to hold matching names
+  const [text, setText] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -38,40 +40,101 @@ const Navbar = () => {
 
   const fullName = `${user.firstName} ${user.lastName}`;
 
-  return (
-    <FlexBetween padding="1rem 6%" backgroundColor={alt}>
-      <FlexBetween gap="1.75rem">
-        <Typography
-          fontWeight="bold"
-          fontSize="clamp(1rem, 2rem, 2.25rem)"
-          color="primary"
-          onClick={() => navigate("/home")}
-          sx={{
-            "&:hover": {
-              color: primaryLight,
-              cursor: "pointer",
-            },
-          }}
-        >
-          FinConnect
-        </Typography>
-        {isNonMobileScreens && (
-          <FlexBetween
-            backgroundColor={neutralLight}
-            borderRadius="9px"
-            gap="3rem"
-            padding="0.1rem 1.5rem"
-          >
-            <InputBase placeholder="Search..." />
-            <IconButton>
-              <Search />
-            </IconButton>
-          </FlexBetween>
-        )}
-      </FlexBetween>
+  const token = useSelector((state) => state.token);
 
-      {/* DESKTOP NAV */}
-      {isNonMobileScreens ? (
+  const getAllUsers = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/users/`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      const users = data.map(user => ({
+        id: user._id,
+        fullName: `${user.firstName} ${user.lastName}`
+      }));
+      return users;
+    } catch (error) {
+      console.error('Error fetching users:', error.message);
+      return [];
+    }
+  };
+
+  const handleSearch = async (text) => {
+    setText(text);
+    const users = await getAllUsers();
+    const matchingNames = users.filter(user =>
+      user.fullName.toLowerCase().includes(text.toLowerCase())
+    );
+    setMatchingNames(matchingNames);
+  };
+
+  const handleNameClick = (id) => {
+    navigate(`/profile/${id}`);
+    window.location.reload();
+  };
+
+  return (
+    <Box position="relative">
+      <FlexBetween padding="1rem 6%" backgroundColor={alt}>
+        <FlexBetween gap="1.75rem">
+          <Typography
+            fontWeight="bold"
+            fontSize="clamp(1rem, 2rem, 2.25rem)"
+            color="primary"
+            onClick={() => navigate("/home")}
+            sx={{
+              "&:hover": {
+                color: primaryLight,
+                cursor: "pointer",
+              },
+            }}
+          >
+            FinConnect
+          </Typography>
+          {isNonMobileScreens && (
+            <FlexBetween
+              backgroundColor={neutralLight}
+              borderRadius="9px"
+              gap="3rem"
+              padding="0.1rem 1.5rem"
+            >
+              <InputBase 
+                placeholder="Search..."
+                onChange={(e) => handleSearch(e.target.value)}
+                value={text}
+              />
+              <IconButton>
+                <Search />
+              </IconButton>
+            </FlexBetween>
+          )}
+        </FlexBetween>
+
+        {/* Display matching names below the search input */}
+        {(matchingNames.length > 0 && text !== '') && (
+          <Box
+            position="absolute"
+            top="calc(100% + 8px)"
+            left="21.5%"
+            transform="translateX(-50%)"
+            width="300px"
+            backgroundColor="white"
+            borderRadius="5px"
+            padding="10px"
+            zIndex="100"
+          >
+            {matchingNames.map((user, index) => (
+              <Typography key={index} style={{cursor: 'pointer'}} color="black" onClick={() => handleNameClick(user.id)}>
+                {user.fullName}
+              </Typography>
+            ))}
+          </Box>
+        )}
+        {isNonMobileScreens ? (
         <FlexBetween gap="2rem">
           <IconButton onClick={() => dispatch(setMode())}>
             {theme.palette.mode === "dark" ? (
@@ -178,7 +241,8 @@ const Navbar = () => {
           </FlexBetween>
         </Box>
       )}
-    </FlexBetween>
+      </FlexBetween>
+    </Box>
   );
 };
 

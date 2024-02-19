@@ -1,6 +1,5 @@
 import {
   ManageAccountsOutlined,
-  EditOutlined,
   LocationOnOutlined,
   WorkOutlineOutlined,
 } from "@mui/icons-material";
@@ -27,6 +26,8 @@ const UserWidget = ({ userId, picturePath }) => {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await response.json();
+    console.log("userType:- ", data.userType);
+    localStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
     setUser(data);
   };
 
@@ -43,9 +44,7 @@ const UserWidget = ({ userId, picturePath }) => {
     lastName,
     location,
     occupation,
-    viewedProfile,
-    impressions,
-    friends,
+    userType,
   } = user;
 
   return (
@@ -72,7 +71,7 @@ const UserWidget = ({ userId, picturePath }) => {
             >
               {firstName} {lastName}
             </Typography>
-            <Typography color={medium}>{friends.length}friends</Typography>
+            {/* <Typography color={medium}>{friends.length}friends</Typography> */}
           </Box>
         </FlexBetween>
         <ManageAccountsOutlined />
@@ -94,7 +93,7 @@ const UserWidget = ({ userId, picturePath }) => {
       <Divider />
       <Divider />
       <Box p="1rem 0">
-        <Typography> User Type :- {} </Typography>
+        <Typography> User Type :- {userType} </Typography>
       </Box>
     </WidgetWrapper>
   );

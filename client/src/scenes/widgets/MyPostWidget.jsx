@@ -36,6 +36,10 @@ const MyPostWidget = ({ picturePath }) => {
   const medium = palette.neutral.medium;
 
   const handlePost = async () => {
+    if(post.trim() === ''){
+      alert('Please enter text');
+      return;
+    }
     const formData = new FormData();
     formData.append("userId", _id);
     formData.append("description", post);
@@ -54,7 +58,6 @@ const MyPostWidget = ({ picturePath }) => {
     setImage(null);
     setPost("");
   };
-
   return (
     <WidgetWrapper>
       <FlexBetween gap="1.5rem">
@@ -129,21 +132,18 @@ const MyPostWidget = ({ picturePath }) => {
           </Typography>
         </FlexBetween>
 
-        {isNonMobileScreens ? (
+        {/* {isNonMobileScreens ? (
           <>
-        
             <FlexBetween gap="0.25rem">
               <AttachFileOutlined sx={{ color: mediumMain }} />
               <Typography color={mediumMain}>Video</Typography>
             </FlexBetween>
-
-           
           </>
         ) : (
           <FlexBetween gap="0.25rem">
             <MoreHorizOutlined sx={{ color: mediumMain }} />
           </FlexBetween>
-        )}
+        )} */}
 
         <Button
           disabled={!post}
