@@ -32,6 +32,7 @@ export const getFeedPosts = async (req, res) => {
     const post = await Post.find();
     res.status(200).json(post);
   } catch (err) {
+    console.log('Get posts error');
     res.status(404).json({ message: err.message });
   }
 };
